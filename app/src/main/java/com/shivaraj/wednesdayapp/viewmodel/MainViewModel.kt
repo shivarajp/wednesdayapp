@@ -17,7 +17,6 @@ class MainViewModel(val dataRepository: Repository): ViewModel() {
     fun getMatchingSongs(queryString: String): LiveData<ArrayList<SongsModel>> {
 
         return liveData(Dispatchers.IO) {
-            //emit(Resource.loading(null))
             val data = dataRepository.getMatchingSongs(queryString)
             emit(data.data!!)
         }

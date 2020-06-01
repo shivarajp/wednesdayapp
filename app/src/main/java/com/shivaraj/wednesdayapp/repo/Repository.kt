@@ -9,10 +9,6 @@ import com.shivaraj.wednesdayapp.data.remote.AppleAPIService
 import com.shivaraj.wednesdayapp.data.remote.Resource
 import com.shivaraj.wednesdayapp.data.remote.ResponseHandler
 import com.shivaraj.wednesdayapp.data.remote.RetrofitGenerator
-import okhttp3.ResponseBody
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
 
 open class Repository(val app: Application) {
 
@@ -26,18 +22,18 @@ open class Repository(val app: Application) {
 
     suspend fun getMatchingSongs(queryString: String): Resource<ArrayList<SongsModel>> {
 
-       return try {
-           val response = api.getMatchingSongs(CONTENT_TYPE, queryString)
-           storeInRoom(response)
+        return try {
+            val response = api.getMatchingSongs(CONTENT_TYPE, queryString)
+            storeInRoom(response)
 
-           val list = getSearchedSongsFromDb(queryString)
-           responseHandler.handleSuccess(list as ArrayList)
+            val list = getSearchedSongsFromDb(queryString)
+            responseHandler.handleSuccess(list as ArrayList)
 
-       }catch (e: Exception){
+        } catch (e: Exception) {
 
-           val list = getSearchedSongsFromDb(queryString)
-           responseHandler.handleSuccess(list as ArrayList)
-       }
+            val list = getSearchedSongsFromDb(queryString)
+            responseHandler.handleSuccess(list as ArrayList)
+        }
     }
 
     private fun getSearchedSongsFromDb(queryString: String): List<SongsModel> {
@@ -48,48 +44,15 @@ open class Repository(val app: Application) {
 
     private fun storeInRoom(responseJsonData: SearchResultResponseModel) {
 
-        //val list = arrayListOf<SongsModel>()
         responseJsonData.results.forEach {
 
-            val eachTrack = SongsModel(it.trackId,
+            val eachTrack = SongsModel(
+                it.trackId,
                 it.artistName, trackName = it.trackName, trackPrice = it.trackPrice,
-                artworkUrl30 = it.artworkUrl30, releaseDate = it.releaseDate)
-            //list.add(eachTrack)
+                artworkUrl30 = it.artworkUrl30, releaseDate = it.releaseDate
+            )
             db.insertAll(eachTrack)
         }
     }
-
-
-    private fun getFile(data: ResponseBody): String {
-
-        if (data==null)
-            return ""
-        var input: InputStream? = null
-        try {
-            input = data.byteStream()
-
-            val sb = StringBuilder()
-            var line: String?
-
-            val br = BufferedReader(InputStreamReader(input))
-            line = br.readLine()
-
-            while (line != null) {
-                sb.append(line)
-                line = br.readLine()
-            }
-            br.close()
-
-            return sb.toString()
-
-        }catch (e:Exception){
-            //Log.e("saveFile",e.toString())
-        }
-        finally {
-            input?.close()
-        }
-        return ""
-    }
-
 
 }
